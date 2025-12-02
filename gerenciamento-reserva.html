@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Gerenciamento de Reservas</title>
+  <style>
+    *:not(dialog) {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #sistema-reserva {
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+      background-color: #D0E4F2;
+      padding: 20px 6%;
+      font-family: sans-serif;
+      border-radius: 18px;
+    }
+
+    #sistema-reserva img {
+      max-width: 75%;
+      align-self: center;
+    }
+
+    #sistema-reserva h2 {
+      text-align: center;
+      font-size: 28px
+    }
+
+    .tabela-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+
+    }
+
+    table thead {
+      background-color: #002B5B;
+      color: #fff;
+    }
+
+    table th,
+    table td {
+      border: 2px solid #000;
+      padding: 8px;
+      white-space: nowrap;
+    }
+
+    table td:last-child,
+    table th:last-child {
+      white-space: normal;
+      max-width: 300px;
+      word-wrap: break-word;
+    }
+
+    #sheetdb-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #sheetdb-form input,
+    #sheetdb-form select {
+      border: none;
+      outline: none;
+      font-size: 16px;
+      color: #000;
+    }
+
+    #sheetdb-form button {
+      background-color: #002B5B;
+      color: #fff;
+      border: 3px solid #35C2FF;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      align-self: center;
+    }
+
+    #sheetdb-form button:hover {
+      background-color: #35c2ffff;
+      color: #00112b;
+    }
+
+    .form-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .edit-btn {
+      display: none;
+      background-color: #002B5B;
+      border: none;
+      font-size: 16px;
+      color: #fff;
+      padding: 2px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .edit-btn.active {
+      display: inline;
+    }
+
+    .input-field {
+      display: flex;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 10px 15px 3px rgba(0, 0, 0, 0.1);
+      padding: 10px 5px;
+      max-width: 180px;
+    }
+
+    .input-field input {
+      width: 100%;
+    }
+
+    .input-field:focus-within {
+      outline: 2px solid #004AAD;
+    }
+
+    input:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px white inset !important;
+      color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <section id="sistema-reserva">
+    <img src="https://midiasstoragesec.blob.core.windows.net/001/2025/11/seintec_01.png" alt="">
+    <h2>SEINTEC | Gerenciamento de Reservas</h2>
+    <form id="sheetdb-form">
+      <div class="form-row">
+        <div class="input-field">
+          <input type="text" name="nome" id="nome" placeholder="Nome">
+        </div>
+        <select name="data[setor]" id="setor" class="input-field">
+          <option value="" disabled selected>Setor</option>
+          <option value="ESE">ESE</option>
+          <option value="ECC">ECC</option>
+          <option value="ASURE">ASURE</option>
+          <option value="SEOM">SEOM</option>
+          <option value="SEAFIN">SEAFIN</option>
+          <option value="SEPES">SEPES</option>
+          <option value="SEGRE">SEGRE</option>
+          <option value="SEINTEC">SEINTEC</option>
+          <option value="SEFISC">SEFISC</option>
+          <option value="SEFIM">SEFIM</option>
+          <option value="SECOMSE">SECOMSE</option>
+          <option value="SEFREP">SEFREP</option>
+          <option value="SEAPE">SEAPE</option>
+          <option value="SEMAT">SEMAT</option>
+          <option value="SEVESC">SEVESC</option>
+          <option value="SETEC">SETEC</option>
+        </select>
+        <select name="data[sala]" id="sala" class="input-field">
+          <option value="" disabled selected>Sala</option>
+          <option value="Sala de Transmissão">Sala de Transmissão</option>
+          <option value="Midioteca">Midioteca</option>
+          <option value="Auditório">Auditório</option>
+          <option value="Sala de Reunião">Sala de Reunião</option>
+          <option value="Norte 1">Norte I</option>
+          <option value="Alfabetiza">Alfabetiza</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="input-field">
+          <input type="date" name="data[data]" id="data">
+        </div>
+        <div class="input-field">
+          <input type="time" name="data[hora]" id="hora">
+        </div>
+      </div>
+      <button type="submit">Buscar</button>
+      <button class="context-btn" onclick="excluirReservas()"><i class="fa-solid fa-trash-can"></i> Excluir</button>
+    </form>
+
+    <div class="tabela-container">
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" id="selecionar-todos">
+            </th>
+            <th>Nome</th>
+            <th>Sobrenome</th>
+            <th>Setor</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Sala</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Equipamentos</th>
+            <th>Observações</th>
+          </tr>
+        </thead>
+        <tbody id="reservas">
+
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <script>
+    function carregarReservas(dados) {
+      const reservasTbody = document.getElementById('reservas');
+      reservasTbody.innerHTML = '';
+      dados.forEach(reserva => {
+        const linhas = document.createElement('tr');
+
+        function adicionaZero(numero) {
+          if (numero <= 9) {
+            return "0" + numero;
+          } else {
+            return numero;
+          }
+        }
+        const diaSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+        const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        let data = new Date(reserva.data + "T00:00:00");
+        let dataFormatada = (diaSemana[data.getDay()] + ", " + (adicionaZero(data.getDate()) + " " + meses[(data.getMonth())] + " " + data.getFullYear()));
+
+        let horarios = JSON.parse(reserva.horarios).join(', ');
+
+        let equipamentos;
+        try {
+          equipamentos = JSON.parse(reserva.equipamentos).join(', ');
+        } catch {
+          equipamentos = '';
+        }
+        linhas.innerHTML = `
+          <td><input type="checkbox" name="reserva" value="${reserva.id}"></td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.nome}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.sobrenome}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.setor}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.email}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.telefone}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.sala}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${dataFormatada}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${horarios}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${equipamentos}</td>
+          <td><button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${reserva.observacoes}</td>
+        `;
+        reservasTbody.appendChild(linhas);
+      });
+    }
+    fetch('https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=desc')
+      .then(response => response.json())
+      .then(carregarReservas);
+
+    const form = document.getElementById('sheetdb-form');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const setor = document.getElementById('setor').value;
+      const sala = document.getElementById('sala').value;
+      const data = document.getElementById('data').value;
+      const hora = document.getElementById('hora').value;
+
+      form.reset();
+
+      let pesquisa = [];
+      if (nome) {
+        pesquisa.push(`nome=${nome}`);
+      }
+      if (setor) {
+        pesquisa.push(`setor=${setor}`);
+      }
+      if (sala) {
+        pesquisa.push(`sala=${sala}`);
+      }
+      if (data) {
+        pesquisa.push(`data=${data}`);
+      }
+
+      let api = `https://sheetdb.io/api/v1/g7hajfb9evf5v`;
+      if (pesquisa.length) {
+        api += '/search?' + pesquisa.join('&');
+      }
+
+      fetch(api)
+        .then(response => response.json())
+        .then(function (dados) {
+          let resultado = dados;
+          if (hora) {
+            resultado = dados.filter(reserva => {
+              try {
+                return JSON.parse(reserva.horarios)
+                  .map(h => h.trim())
+                  .includes(hora.trim());
+              } catch {
+                0
+                return false;
+              }
+            });
+          }
+          carregarReservas(resultado);
+        });
+    });
+
+    document.getElementById('selecionar-todos').addEventListener('change', function () {
+      const checkboxes = document.querySelectorAll('input[name="reserva"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+      });
+    });
+
+    function excluirReservas() {
+      const checkboxes = document.querySelectorAll('input[name="reserva"]:checked');
+      if (checkboxes.length === 0) {
+        alert('Selecione ao menos uma reserva para excluir.');
+        return;
+      }
+      if (!confirm(`Tem certeza que deseja excluir ${checkboxes.length} reserva(s)?`)) {
+        return;
+      }
+      const ids = Array.from(checkboxes).map(cb => cb.value);
+      let deletions = ids.map(id => {
+        return fetch(`https://sheetdb.io/api/v1/g7hajfb9evf5v/id/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }).then(response => response.json());
+      });
+      Promise.all(deletions).then(() => {
+        alert('Reservas excluídas com sucesso!');
+        location.reload();
+      }).catch(() => {
+        alert('Ocorreu um erro ao excluir as reservas.');
+      });
+    }
+
+    // Eventos de hover para mostrar/ocultar botão de edição
+    document.addEventListener('mouseover', function (e) {
+      const td = e.target.closest('td:not(:first-child)');
+      if (td && !td.querySelector('input[type="text"], input[type="date"]')) {
+        const editBtn = td.querySelector('.edit-btn');
+        if (editBtn) {
+          editBtn.classList.add('active');
+        }
+      }
+    });
+
+    document.addEventListener('mouseout', function (e) {
+      const td = e.target.closest('td:not(:first-child)');
+      if (td) {
+        const editBtn = td.querySelector('.edit-btn');
+        if (editBtn) {
+          editBtn.classList.remove('active');
+        }
+      }
+    });
+
+    // Evento de clique para editar
+    document.addEventListener('click', function (e) {
+      const editBtn = e.target.closest('.edit-btn');
+      if (!editBtn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const td = editBtn.closest('td');
+      const tr = editBtn.closest('tr');
+      const checkbox = tr.querySelector('input[type="checkbox"]');
+      const reservaId = checkbox.value;
+
+      // Mapear colunas para nomes de campo
+      const campos = ['nome', 'sobrenome', 'setor', 'email', 'telefone', 'sala', 'data', 'horarios', 'equipamentos', 'observacoes'];
+      const colIndex = Array.from(tr.querySelectorAll('td')).indexOf(td);
+      const campo = campos[colIndex - 1];
+
+      const conteudoAtual = td.textContent.replace(editBtn.textContent, '').trim();
+
+      // Criar campo de edição
+      const input = document.createElement('input');
+      input.type = campo === 'data' ? 'date' : 'text';
+      input.value = conteudoAtual;
+      input.style.padding = '4px';
+      input.style.width = '100%';
+      input.style.boxSizing = 'border-box';
+
+      // Substituir conteúdo
+      td.innerHTML = '';
+      td.appendChild(input);
+      input.focus();
+      input.select();
+
+      // Função para restaurar
+      const restaurar = () => {
+        td.innerHTML = `<button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${conteudoAtual}`;
+      };
+
+      // Salvar ao pressionar Enter
+      input.addEventListener('keydown', function (evt) {
+        if (evt.key === 'Enter') {
+          salvarEdicao(reservaId, campo, input.value, td, conteudoAtual);
+        }
+        if (evt.key === 'Escape') {
+          restaurar();
+        }
+      });
+
+      input.addEventListener('blur', function () {
+        setTimeout(() => {
+          if (input.parentElement === td) {
+            restaurar();
+          }
+        }, 100);
+      });
+    });
+
+    // Função para salvar a edição
+    function salvarEdicao(reservaId, campo, novoValor, td, valorAnterior) {
+      if (novoValor.trim() === '') {
+        alert('O campo não pode estar vazio!');
+        td.innerHTML = `<button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${valorAnterior}`;
+        return;
+      }
+
+      if (novoValor === valorAnterior) {
+        td.innerHTML = `<button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${valorAnterior}`;
+        return;
+      }
+
+      let valorParaSalvar = novoValor;
+
+      // Se for horarios ou equipamentos, transformar em JSON array
+      if (campo === "horarios" || campo === "equipamentos") {
+        const array = novoValor
+          .split(/[,]\s*/)
+          .map(x => x.trim())       
+          .filter(x => x.length > 0);
+
+        valorParaSalvar = JSON.stringify(array);
+      }
+
+      // Montar o objeto final
+      const dados = { [campo]: valorParaSalvar };
+
+
+      // Enviar UPDATE para o banco de dados
+      fetch(`https://sheetdb.io/api/v1/g7hajfb9evf5v/id/${reservaId}`, {
+        method: 'PATCH',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data: dados })
+      })
+        .then(response => response.json())
+        .then(result => {
+          alert('Registro atualizado com sucesso!');
+          td.innerHTML = `<button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${novoValor}`;
+        })
+        .catch(error => {
+          alert('Erro ao atualizar o registro!');
+          console.error(error);
+          td.innerHTML = `<button class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></button> ${valorAnterior}`;
+        });
+    }
+
+    // Enviar altura para o iframe
+    function sendHeight() {
+      parent.postMessage(
+        { height: document.documentElement.scrollHeight },
+        "*"
+      );
+    }
+
+    window.addEventListener('load', sendHeight);
+
+    window.addEventListener('resize', sendHeight);
+
+    const observer = new MutationObserver(sendHeight);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+  </script>
+</body>
+
+</html>

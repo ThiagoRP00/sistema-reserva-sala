@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Reserva de Sala</title>
+</head>
+<style>
+  /* Estilos CSS */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  #sistema-reserva {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    background-color: #D0E4F2;
+    padding: 20px 6%;
+    font-family: sans-serif;
+    border-radius: 18px;
+  }
+
+  #sistema-reserva img {
+    max-width: 75%;
+    align-self: center;
+  }
+
+  #sistema-reserva h2 {
+    text-align: center;
+    font-size: 28px;
+  }
+
+  #sistema-reserva button,
+  #horarios label {
+    background-color: #002B5B;
+    color: #fff;
+    border: 3px solid #35C2FF;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  #sistema-reserva button:hover,
+  #sistema-reserva button.active,
+  #horarios label.active {
+    background-color: #35C2FF;
+    color: #00112b;
+  }
+
+  #tabela-reservas {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+  }
+
+  #tabela-reservas thead {
+    background-color: #002B5B;
+    color: #fff;
+  }
+
+  #tabela-reservas th,
+  #tabela-reservas td {
+    border: 2px solid #000;
+    padding: 8px;
+  }
+
+  #sheetdb-form {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  #sheetdb-form input,
+  #sheetdb-form select {
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #000;
+  }
+
+  #sheetdb-form button[type="submit"] {
+    align-self: center;
+    width: 150px;
+  }
+
+  #nome-completo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  #nome-completo>div {
+    display: flex;
+    gap: 12px;
+  }
+
+  #data-hora,
+  #equipamentos {
+    display: flex;
+    gap: 20px;
+  }
+
+  #horarios {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    text-align: center;
+    gap: 10px;
+  }
+
+  #horarios input {
+    display: none;
+  }
+
+  .input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-title {
+    font-weight: bold;
+  }
+
+  .input-field {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 10px 15px 3px rgba(0, 0, 0, 0.1);
+    padding: 10px 5px;
+    max-width: 275px;
+  }
+
+  .input-box textarea {
+    border: none;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 10px 15px 3px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+  }
+
+  .input-field input {
+    width: 100%;
+  }
+
+  #input-telefone {
+    max-width: 180px;
+  }
+
+  #input-data {
+    max-width: 142px;
+  }
+
+  .input-box .input-field:focus-within,
+  textarea:focus-within {
+    outline: 2px solid #004AAD;
+  }
+
+  input:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    color: #000;
+  }
+
+  @media screen and (min-width: 1200px) {
+    #horarios label:hover {
+      background-color: #35C2FF;
+      color: #00112b;
+    }
+  }
+
+  @media screen and (max-width: 720px) {
+
+    #sistema-reserva img {
+      max-width: 100%;
+    }
+
+    #data-hora,
+    #equipamentos {
+      flex-direction: column;
+    }
+
+    #tabela-container {
+      overflow-x: auto;
+    }
+
+    #horarios {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 430px) {
+    #horarios {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<body>
+  <section id="sistema-reserva">
+    <img src="https://midiasstoragesec.blob.core.windows.net/001/2025/11/seintec_01.png" alt="Logo SEINTEC">
+    <h2>SEINTEC | Reserva de Sala</h2>
+    <!-- Botões principais -->
+    <div id="botoes-sistema">
+      <!-- Executa função para consultar -->
+      <button onclick="consultar()" id="consultar">Consultar Reservas</button>
+      <!-- Executa função para reservar -->
+      <button onclick="reservar()" id="reservar">Reservar</button>
+    </div>
+    <!-- Tabela de reservas -->
+    <div id="tabela-container">
+      <table id="tabela-reservas">
+        <!-- Cabeçalho da tabela -->
+        <thead>
+          <tr>
+            <th>Nome Completo</th>
+            <th>Setor</th>
+            <th>Sala</th>
+            <th>Data</th>
+            <th>Horários</th>
+            <th>Equipamentos</th>
+          </tr>
+        </thead>
+        <!-- Corpo da tabela (reservas). -->
+        <tbody id="reservas">
+          <!-- As linhas serão adicionadas automaticamente -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Formulário de solicitação -->
+    <form action="https://sheetdb.io/api/v1/e05sh2zimvo1q" method="POST" id="sheetdb-form">
+      <!-- Incremento automático de IDs -->
+      <input type="hidden" name="data[id]" value="INCREMENT">
+      <div id="nome-completo">
+        <div class="input-title">Nome Completo:</div>
+        <div>
+          <div class="input-box">
+            <div class="input-field">
+              <input type="text" name="data[nome]" id="nome" required>
+            </div>
+            <label for="nome">Nome</label>
+          </div>
+          <div class="input-box">
+            <div class="input-field">
+              <input type="text" name="data[sobrenome]" id="sobrenome" required>
+            </div>
+            <label for="sobrenome">Sobrenome</label>
+          </div>
+        </div>
+      </div>
+      <div class="input-box">
+        <label for="setor" class="input-title">Setor:</label>
+        <div>
+          <select name="data[setor]" id="setor" class="input-field" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="ESE">ESE</option>
+            <option value="EEC">EEC</option>
+            <option value="ASURE">ASURE</option>
+            <option value="SEOM">SEOM</option>
+            <option value="SEAFIN">SEAFIN</option>
+            <option value="SEPES">SEPES</option>
+            <option value="SEGRE">SEGRE</option>
+            <option value="SEINTEC">SEINTEC</option>
+            <option value="SEFISC">SEFISC</option>
+            <option value="SEFIM">SEFIM</option>
+            <option value="SECOMSE">SECOMSE</option>
+            <option value="SEFREP">SEFREP</option>
+            <option value="SEAPE">SEAPE</option>
+            <option value="SEMAT">SEMAT</option>
+            <option value="SEVESC">SEVESC</option>
+            <option value="SETEC">SETEC</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-box">
+        <label for="email" class="input-title">E-mail:</label>
+        <div class="input-field">
+          <input type="email" name="data[email]" id="email" required>
+        </div>
+      </div>
+      <div class="input-box">
+        <label for="telefone" class="input-title">Telefone:</label>
+        <div class="input-field" id="input-telefone">
+          <input type="tel" name="data[telefone]" id="telefone" required>
+        </div>
+      </div>
+      <div class="input-box">
+        <label for="sala" class="input-title">Qual sala deseja?</label>
+        <div>
+          <select name="data[sala]" id="sala" class="input-field" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="Sala de Transmissão">Sala de Transmissão</option>
+            <option value="Midioteca">Midioteca</option>
+            <option value="Auditório">Auditório</option>
+            <option value="Sala de Reunião">Sala de Reunião</option>
+            <option value="Norte 1">Norte 1</option>
+            <option value="Alfabetiza">Alfabetiza</option>
+          </select>
+        </div>
+      </div>
+      <div id="data-hora">
+        <div class="input-box" id="input-data">
+          <label for="data" class="input-title">Data da Reserva:</label>
+          <div class="input-field">
+            <input type="date" name="data[data]" id="data" required>
+          </div>
+        </div>
+        <div class="input-box">
+          <div class="input-title">Hora da Reserva:</div>
+          <div id="horarios">
+            <label><input type="checkbox" name="data[horarios][]" value="08:00">08:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="09:00">09:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="10:00">10:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="11:00">11:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="12:00">12:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="13:00">13:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="14:00">14:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="15:00">15:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="16:00">16:00</label>
+            <label><input type="checkbox" name="data[horarios][]" value="17:00">17:00</label>
+          </div>
+        </div>
+      </div>
+      <div class="input-box">
+        <div class="input-title">Equipamentos Necessários:</div>
+        <div id="equipamentos">
+          <div>
+            <input type="checkbox" name="data[equipamentos][]" id="projetor" value="Projetor">
+            <label for="projetor">Projetor</label>
+          </div>
+          <div>
+            <input type="checkbox" name="data[equipamentos][]" id="computador" value="Computador">
+            <label for="computador">Computador</label>
+          </div>
+          <div>
+            <input type="checkbox" name="data[equipamentos][]" id="caixa-som" value="Caixa de Som">
+            <label for="caixa-som">Caixa de Som</label>
+          </div>
+          <div>
+            <input type="checkbox" name="data[equipamentos][]" id="microfone" value="Microfone">
+            <label for="microfone">Microfone</label>
+          </div>
+          <div>
+            <input type="checkbox" name="data[equipamentos][]" id="impressora" value="Impressora">
+            <label for="impressora">Impressora</label>
+          </div>
+          <div>
+            <input type="checkbox" name="data[equipamentos][]" id="tv" value="TV">
+            <label for="tv">TV</label>
+          </div>
+        </div>
+      </div>
+      <div class="input-box">
+        <label for="observacoes" class="input-title">Observações:</label>
+        <textarea name="data[observacoes]" id="observacoes" rows="8"></textarea>
+      </div>
+      <button type="submit">Enviar</button>
+    </form>
+  </section>
+
+  <!-- Instalação do jQuery para adicionar biblioteca de máscaras -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Biblioteca de máscaras -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
+
+  <!-- Lógica de funcionamento do sistema -->
+  <script>
+    // Variáveis para os botões
+    const consultarBtn = document.getElementById('consultar');
+    const reservarBtn = document.getElementById('reservar');
+
+    // Variável para a tabela
+    const tabelaReservas = document.getElementById('tabela-reservas');
+
+    // Variável para o formulário
+    const form = document.getElementById('sheetdb-form');
+    // Reseta o formulário ao carregar a página
+    form.reset();
+
+    // Registra a data atual
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    // Trava para apenas poder serlecionar a data no formulàrio a partir da data atual
+    document.getElementById('data').setAttribute('min', `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}-${hoje.getDate().toString().padStart(2, '0')}`);
+
+    // Outras variáveis
+    let salasReservadas = [];
+    let datasReservadas = [];
+    let reservasData = [];
+
+    // Função para carregar as reservas na tabela
+    function carregarReservas() {
+      // API do SheetDB para acessar o banco de dados na planilha do Google
+      fetch('https://sheetdb.io/api/v1/e05sh2zimvo1q?sort_by=data&sort_order=asc')
+        .then(response => response.json())
+        .then(data => {
+          reservasData = data;
+          // Variável do 
+          const reservasTbody = document.getElementById('reservas');
+          reservasTbody.innerHTML = '';
+
+          // Filtra reservas
+          data.filter(reserva => {
+            // Compara datas das reservas e retorna apenas as que são iguais ou maiores que a data atual
+            const dataReserva = new Date(reserva.data + "T00:00:00");
+            return dataReserva >= hoje;
+
+          }).forEach(reserva => {
+            // Cria uma linha para cada reserva
+            const linhas = document.createElement('tr');
+
+            // Adiciona um zero na frente do número quando o dia for menor
+            function adicionaZero(numero) {
+              if (numero <= 9) {
+                return "0" + numero;
+              } else {
+                return numero;
+              }
+            }
+
+            // Lista de dias da semana e meses para formatação da data
+            const diaSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+            const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+            // Formatação da data
+            const data = new Date(reserva.data + "T00:00:00");
+            let dataFormatada = (diaSemana[data.getDay()] + ", " + (adicionaZero(data.getDate()) + " " + meses[(data.getMonth())] + " " + data.getFullYear()));
+
+            // Horários separados por vírgulas
+            let horarios = JSON.parse(reserva.horarios).join(', ');
+
+            // Equipamentos separados por vírgulas, caso tenha.
+            let equipamentos;
+            try {
+              equipamentos = JSON.parse(reserva.equipamentos).join(', ');
+            } catch {
+              equipamentos = '';
+            }
+
+            // Insere os dados formatados e filtrados na tabela
+            linhas.innerHTML = `
+              <td>${reserva.nome} ${reserva.sobrenome}</td>
+              <td>${reserva.setor}</td>
+              <td>${reserva.sala}</td>
+              <td>${dataFormatada}</td>
+              <td>${horarios}</td>
+              <td>${equipamentos}</td>
+            `;
+            reservasTbody.appendChild(linhas);
+          });
+        })
+        .catch(error => console.error('Erro ao carregar reservas:', error));
+    }
+    // Executa a função de carregar as reservas quando carrega a página
+    carregarReservas();
+
+    // Função para ocultar o formulário e mostrar apenas a tabela
+    function consultar() {
+      tabelaReservas.style.display = 'table';
+      reservarBtn.classList.remove('active');
+      consultarBtn.classList.add('active');
+      form.style.display = 'none';
+    }
+    // Executa função ao carregar a página
+    consultar();
+
+    // Função para ocultar a tabela e mostrar apenas o formulário
+    function reservar() {
+      tabelaReservas.style.display = 'none';
+      form.style.display = 'flex';
+      consultarBtn.classList.remove('active');
+      reservarBtn.classList.add('active');
+    }
+
+    // Máscara do telefone para quando o usuário digitar o número com 10 ou 11 dígitos
+    $('#telefone').mask('(00) 0000-00009', {
+      onKeyPress: function (val, e, field, options) {
+        field.mask(val.replace(/\D/g, '').length === 11 ? '(00) 00000-0000' : '(00) 0000-00009', options);
+      }
+    });
+
+    // Caixas dos horários
+    const horariosLabel = document.querySelectorAll('#horarios label');
+
+    // Lógica para travar horários já reservados
+    function mostrarHorariosDisponiveis() {
+      const salaSelecionada = document.getElementById('sala').value;
+      const dataSelecionada = document.getElementById('data').value;
+
+      horariosLabel.forEach(label => {
+        label.style.display = 'inline-block';
+        label.querySelector('input').disabled = false;
+      });
+
+      if (!salaSelecionada || salaSelecionada === 'Selecione' || !dataSelecionada) return;
+
+      const reservasFiltradas = reservasData.filter(reserva =>
+        reserva.sala === salaSelecionada && reserva.data === dataSelecionada
+      );
+
+      let horariosReservados = [];
+      reservasFiltradas.forEach(reserva => {
+        try {
+          horariosReservados = horariosReservados.concat(JSON.parse(reserva.horarios));
+        } catch { }
+      });
+
+      horariosLabel.forEach(label => {
+        const checkbox = label.querySelector('input[type="checkbox"]');
+        if (horariosReservados.includes(checkbox.value)) {
+          label.style.display = 'none';
+          checkbox.checked = false;
+        }
+      });
+    }
+
+    // Atualizar horários disponíveis ao mudar sala ou data
+    document.getElementById('sala').addEventListener('change', mostrarHorariosDisponiveis);
+    document.getElementById('data').addEventListener('change', mostrarHorariosDisponiveis);
+
+    // Destacar os horários quando selecionados
+    horariosLabel.forEach(label => {
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (checkbox.checked) {
+        label.classList.add('active');
+      } else {
+        label.classList.remove('active');
+      }
+      checkbox.addEventListener('change', function () {
+        if (checkbox.checked) {
+          label.classList.add('active');
+        } else {
+          label.classList.remove('active');
+        }
+      });
+    });
+
+    // Envio de formulário com as verificações
+    form.addEventListener("submit", e => {
+      const horariosSelecionados = document.querySelectorAll('#horarios input:checked');
+
+      // Verifica se pelo menos um horário foi selecionado
+      if (horariosSelecionados.length === 0) {
+        alert('Selecione pelo menos um horário!');
+        e.preventDefault();
+        return;
+      }
+
+      // Impede que a página recarregue quando enviar o formulário
+      e.preventDefault();
+
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+      }).then((html) => {
+        alert('Solicitação enviada com sucesso!');
+        form.reset();
+
+        // Remove marcação dos horários
+        horariosLabel.forEach(label => {
+          label.classList.remove('active');
+        });
+
+        // Carrega reservas atualizadas
+        carregarReservas();
+      });
+    });
+
+    // Lógica para enviar a altura atual através do iframe. Também corrige problemas de responsividade com a largura
+    function sendHeight() {
+      parent.postMessage(
+        { height: document.documentElement.scrollHeight, width: window.innerWidth },
+        "*"
+      );
+    }
+
+    window.addEventListener('load', sendHeight);
+
+    window.addEventListener('resize', sendHeight);
+
+    const observer = new MutationObserver(sendHeight);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+  </script>
+
+  <!-- IFrame para adicionar na página. 
+   Precisa adicionar o arquivo html nas mídias, copiar o link e colar no src.
+
+  <iframe id="reservaIframe" style="border: none;" src="LINK_PARA_O_ARQUIVO_HTML" width="100%" scrolling="no"></iframe>
+  <script>
+    window.addEventListener("message", function(event) {
+      if (!event.data) return;
+      if (event.data.height) {
+        document.getElementById("reservaIframe").style.height = event.data.height + "px";
+      }
+      if (event.data.width) {
+        console.log("iframe innerWidth:", event.data.width); // verifique se corresponde ao esperado
+      }
+    });
+  </script> -->
+</body>
+
+</html>
