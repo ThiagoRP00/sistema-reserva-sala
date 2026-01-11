@@ -4,212 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/styles.css">
   <title>Sistema de Reserva de Sala</title>
 </head>
-<style>
-  /* Estilos CSS */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  #sistema-reserva {
-    display: flex;
-    flex-direction: column;
-    gap: 50px;
-    background-color: #D0E4F2;
-    padding: 20px 6%;
-    font-family: sans-serif;
-    border-radius: 18px;
-  }
-
-  #sistema-reserva img {
-    max-width: 75%;
-    align-self: center;
-  }
-
-  #sistema-reserva h2 {
-    text-align: center;
-    font-size: 28px;
-  }
-
-  #sistema-reserva button,
-  #horarios label {
-    background-color: #002B5B;
-    color: #fff;
-    border: 3px solid #35C2FF;
-    padding: 12px 20px;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: background-color 0.3s;
-  }
-
-  #sistema-reserva button:hover,
-  #sistema-reserva button.active,
-  #horarios label.active {
-    background-color: #35C2FF;
-    color: #00112b;
-  }
-
-  #tabela-reservas {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-  }
-
-  #tabela-reservas thead {
-    background-color: #002B5B;
-    color: #fff;
-  }
-
-  #tabela-reservas th,
-  #tabela-reservas td {
-    border: 2px solid #000;
-    padding: 8px;
-  }
-
-  #sheetdb-form {
-    flex-direction: column;
-    gap: 30px;
-  }
-
-  #sheetdb-form input,
-  #sheetdb-form select {
-    border: none;
-    outline: none;
-    font-size: 16px;
-    color: #000;
-  }
-
-  #sheetdb-form button[type="submit"] {
-    align-self: center;
-    width: 150px;
-  }
-
-  #nome-completo {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  #nome-completo>div {
-    display: flex;
-    gap: 12px;
-  }
-
-  #data-hora,
-  #equipamentos {
-    display: flex;
-    gap: 20px;
-  }
-
-  #horarios {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    text-align: center;
-    gap: 10px;
-  }
-
-  #horarios input {
-    display: none;
-  }
-
-  .input-box {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .input-title {
-    font-weight: bold;
-  }
-
-  .input-field {
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 10px 15px 3px rgba(0, 0, 0, 0.1);
-    padding: 10px 5px;
-    max-width: 275px;
-  }
-
-  .input-box textarea {
-    border: none;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 10px 15px 3px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-  }
-
-  .input-field input {
-    width: 100%;
-  }
-
-  #input-telefone {
-    max-width: 180px;
-  }
-
-  #input-data {
-    max-width: 142px;
-  }
-
-  .input-box .input-field:focus-within,
-  textarea:focus-within {
-    outline: 2px solid #004AAD;
-  }
-
-  input:-webkit-autofill,
-  textarea:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    color: #000;
-  }
-
-  @media screen and (min-width: 1200px) {
-    #horarios label:hover {
-      background-color: #35C2FF;
-      color: #00112b;
-    }
-  }
-
-  @media screen and (max-width: 720px) {
-
-    #sistema-reserva img {
-      max-width: 100%;
-    }
-
-    #data-hora,
-    #equipamentos {
-      flex-direction: column;
-    }
-
-    #tabela-container {
-      overflow-x: auto;
-    }
-
-    #horarios {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  @media screen and (max-width: 430px) {
-    #horarios {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-</style>
 
 <body>
-  <section id="sistema-reserva">
+  <section id="reserva-sala">
     <img src="https://midiasstoragesec.blob.core.windows.net/001/2025/11/seintec_01.png" alt="Logo SEINTEC">
     <h2>SEINTEC | Reserva de Sala</h2>
     <!-- Botões principais -->
     <div id="botoes-sistema">
       <!-- Executa função para consultar -->
-      <button onclick="consultar()" id="consultar">Consultar Reservas</button>
+      <button onclick="consultar()" id="consultar" class="default-btn">Consultar Reservas</button>
       <!-- Executa função para reservar -->
-      <button onclick="reservar()" id="reservar">Reservar</button>
+      <button onclick="reservar()" id="reservar" class="default-btn">Reservar</button>
     </div>
     <!-- Tabela de reservas -->
     <div id="tabela-container">
@@ -313,16 +121,16 @@
         <div class="input-box">
           <div class="input-title">Hora da Reserva:</div>
           <div id="horarios">
-            <label><input type="checkbox" name="data[horarios][]" value="08:00">08:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="09:00">09:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="10:00">10:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="11:00">11:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="12:00">12:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="13:00">13:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="14:00">14:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="15:00">15:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="16:00">16:00</label>
-            <label><input type="checkbox" name="data[horarios][]" value="17:00">17:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="08:00">08:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="09:00">09:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="10:00">10:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="11:00">11:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="12:00">12:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="13:00">13:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="14:00">14:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="15:00">15:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="16:00">16:00</label>
+            <label class="default-btn"><input type="checkbox" name="data[horarios][]" value="17:00">17:00</label>
           </div>
         </div>
       </div>
@@ -359,7 +167,7 @@
         <label for="observacoes" class="input-title">Observações:</label>
         <textarea name="data[observacoes]" id="observacoes" rows="8"></textarea>
       </div>
-      <button type="submit">Enviar</button>
+      <button type="submit" class="default-btn">Enviar</button>
     </form>
   </section>
 
@@ -386,7 +194,7 @@
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    // Trava para apenas poder serlecionar a data no formulàrio a partir da data atual
+    // Trava para apenas poder selecionar a data no formulário a partir da data atual
     document.getElementById('data').setAttribute('min', `${hoje.getFullYear()}-${(hoje.getMonth() + 1).toString().padStart(2, '0')}-${hoje.getDate().toString().padStart(2, '0')}`);
 
     // Outras variáveis
@@ -397,7 +205,7 @@
     // Função para carregar as reservas na tabela
     function carregarReservas() {
       // API do SheetDB para acessar o banco de dados na planilha do Google
-      fetch('https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=asc')
+      fetch(/*'https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=asc'*/)
         .then(response => response.json())
         .then(data => {
           reservasData = data;
@@ -604,6 +412,5 @@
     });
   </script> -->
 </body>
-
 
 </html>

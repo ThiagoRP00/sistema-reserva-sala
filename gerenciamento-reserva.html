@@ -4,147 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <title>Gerenciamento de Reservas</title>
-  <style>
-    *:not(dialog) {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    #sistema-reserva {
-      display: flex;
-      flex-direction: column;
-      gap: 50px;
-      background-color: #D0E4F2;
-      padding: 20px 6%;
-      font-family: sans-serif;
-      border-radius: 18px;
-    }
-
-    #sistema-reserva img {
-      max-width: 75%;
-      align-self: center;
-    }
-
-    #sistema-reserva h2 {
-      text-align: center;
-      font-size: 28px
-    }
-
-    .tabela-container {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #fff;
-
-    }
-
-    table thead {
-      background-color: #002B5B;
-      color: #fff;
-    }
-
-    table th,
-    table td {
-      border: 2px solid #000;
-      padding: 8px;
-      white-space: nowrap;
-    }
-
-    table td:last-child,
-    table th:last-child {
-      white-space: normal;
-      max-width: 300px;
-      word-wrap: break-word;
-    }
-
-    #sheetdb-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    #sheetdb-form input,
-    #sheetdb-form select {
-      border: none;
-      outline: none;
-      font-size: 16px;
-      color: #000;
-    }
-
-    #sheetdb-form button {
-      background-color: #002B5B;
-      color: #fff;
-      border: 3px solid #35C2FF;
-      padding: 10px 20px;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 5px;
-      font-size: 16px;
-      transition: background-color 0.3s;
-      align-self: center;
-    }
-
-    #sheetdb-form button:hover {
-      background-color: #35c2ffff;
-      color: #00112b;
-    }
-
-    .form-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .edit-btn {
-      display: none;
-      background-color: #002B5B;
-      border: none;
-      font-size: 16px;
-      color: #fff;
-      padding: 2px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .edit-btn.active {
-      display: inline;
-    }
-
-    .input-field {
-      display: flex;
-      background-color: #fff;
-      border-radius: 5px;
-      box-shadow: 0 10px 15px 3px rgba(0, 0, 0, 0.1);
-      padding: 10px 5px;
-      max-width: 180px;
-    }
-
-    .input-field input {
-      width: 100%;
-    }
-
-    .input-field:focus-within {
-      outline: 2px solid #004AAD;
-    }
-
-    input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0 1000px white inset !important;
-      color: #000;
-    }
-  </style>
 </head>
 
 <body>
-  <section id="sistema-reserva">
+  <dialog id="password-box">
+    <p>Senha de acesso</p>
+    <div class="input-field">
+      <input type="password" id="access-password" placeholder="Senha">
+    </div>
+  </dialog>
+  <section id="gerenciamento-reserva">
     <img src="https://midiasstoragesec.blob.core.windows.net/001/2025/11/seintec_01.png" alt="">
     <h2>SEINTEC | Gerenciamento de Reservas</h2>
     <form id="sheetdb-form">
@@ -189,11 +63,11 @@
           <input type="time" name="data[hora]" id="hora">
         </div>
       </div>
-      <button type="submit">Buscar</button>
-      <button class="context-btn" onclick="excluirReservas()"><i class="fa-solid fa-trash-can"></i> Excluir</button>
+      <button type="submit" class="default-btn">Buscar</button>
+      <button onclick="excluirReservas()" class="default-btn"><i class="fa-solid fa-trash-can"></i> Excluir</button>
     </form>
 
-    <div class="tabela-container">
+    <div id="tabela-container">
       <table>
         <thead>
           <tr>
@@ -219,6 +93,9 @@
     </div>
   </section>
   <script>
+    const passwordBox = document.getElementById('password-box');
+    // passwordBox.showModal();
+
     function carregarReservas(dados) {
       const reservasTbody = document.getElementById('reservas');
       reservasTbody.innerHTML = '';
@@ -261,7 +138,7 @@
         reservasTbody.appendChild(linhas);
       });
     }
-    fetch('https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=desc')
+    fetch(/*'https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=desc'*/)
       .then(response => response.json())
       .then(carregarReservas);
 
@@ -447,7 +324,7 @@
       if (campo === "horarios" || campo === "equipamentos") {
         const array = novoValor
           .split(/[,]\s*/)
-          .map(x => x.trim())       
+          .map(x => x.trim())
           .filter(x => x.length > 0);
 
         valorParaSalvar = JSON.stringify(array);
@@ -493,6 +370,46 @@
     const observer = new MutationObserver(sendHeight);
     observer.observe(document.body, { childList: true, subtree: true, attributes: true });
   </script>
+
+  <!-- Caixa de diálogo para senha de acesso e iframe para adicionar no site. 
+  Altere a senha no código se necessário e adicione o link da página no src do iframe.
+
+  <div id="password-box" style="display: flex; flex-direction: column; align-items: center; border: 2px solid black; padding: 20px; width: 300px; margin: 0 auto;">
+    <p>Digite a senha:</p>
+    <div style="margin-bottom: 10px;">
+      <input type="password" id="passwordInput" />
+    </div>
+    <button id="submit-btn">Enviar</button>
+  </div>
+
+  <iframe id="reservaIframe" style="border: none;" src="LINK_PARA_O_ARQUIVO_HTML" width="100%" scrolling="no"></iframe>
+  <script>
+    const passwordBox = document.getElementById("password-box");
+    const passwordInput = document.getElementById("passwordInput");
+    const iframe = document.getElementById("iframe");
+
+    iframe.style.display = "none";
+
+    document.getElementById("submit-btn").addEventListener("click", function () {
+      if (passwordInput.value === "Senha123") {
+        passwordBox.style.display = "none";
+        iframe.style.display = "block";
+      } else {
+        alert("Senha incorreta. Tente novamente.");
+      }
+    });
+
+    window.addEventListener("message", function (event) {
+      if (!event.data) return;
+      if (event.data.height) {
+        iframe.style.height = event.data.height + "px";
+      }
+      if (event.data.width) {
+        console.log("iframe innerWidth:", event.data.width);
+      }
+    });
+  </script> -->
+
 </body>
 
 </html>
