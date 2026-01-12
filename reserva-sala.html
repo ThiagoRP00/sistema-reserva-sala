@@ -205,7 +205,7 @@
     // Função para carregar as reservas na tabela
     function carregarReservas() {
       // API do SheetDB para acessar o banco de dados na planilha do Google
-      fetch(/*'https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=asc'*/)
+      fetch('https://sheetdb.io/api/v1/g7hajfb9evf5v?sort_by=data&sort_order=asc')
         .then(response => response.json())
         .then(data => {
           reservasData = data;
@@ -412,5 +412,6 @@
     });
   </script> -->
 </body>
+
 
 </html>
